@@ -7,7 +7,7 @@ import { Target, Calendar, Plus } from 'lucide-react';
 
 const goals = [
   {
-    name: 'Emergency Fund',
+    name: 'Damage Control',
     target: 10000,
     current: 7500,
     deadline: '2026-10-31',
@@ -15,7 +15,7 @@ const goals = [
     icon: '🛡️',
   },
   {
-    name: 'New Car',
+    name: 'Work Fine',
     target: 25000,
     current: 12000,
     deadline: '2025-01-30',
@@ -23,7 +23,7 @@ const goals = [
     icon: '🚗',
   },
   {
-    name: 'Vacation',
+    name: 'Logistics',
     target: 5000,
     current: 3200,
     deadline: '2025-12-15',

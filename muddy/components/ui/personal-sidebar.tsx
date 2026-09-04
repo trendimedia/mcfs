@@ -5,13 +5,18 @@ import {
   Wallet,
   Target,
   BarChart3,
-  Settings,
-  PiggyBank,
+  Users,
+  CalendarCheck,
   ChevronRight,
   Bell,
   User,
   Menu,
   DollarSign,
+  BroomSparkles,
+  Box,
+  Clock,
+  Rocket,
+  
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -24,11 +29,16 @@ interface SidebarProps {
 
 const navigation = [
   { name: 'Dashboard', href: '#', icon: LayoutDashboard, current: true },
-  { name: 'Transactions', href: '#', icon: Wallet, current: false },
-  { name: 'Budget', href: '#', icon: BarChart3, current: false },
-  { name: 'Goals', href: '#', icon: Target, current: false },
-  { name: 'Investments', href: '#', icon: PiggyBank, current: false },
-  { name: 'Settings', href: '#', icon: Settings, current: false },
+  { name: 'Payroll', href: '#', icon: Wallet, current: false },
+  { name: 'Attendance', href: '#', icon: BarChart3, current: false },
+  { name: 'Absence Management', href: '#', icon: CalendarCheck, current: false },
+  { name: 'Advance & Overtime', href: '#', icon: DollarSign, current: false },
+  { name: 'Perfomance', href: '#', icon: Rocket, current: false },
+  { name: 'Termination', href: '#', icon: BarChart3, current: false },
+  { name: 'Applications', href: '#', icon: Box, current: false },
+  { name: 'Leave Management', href: '#', icon: Clock, current: false },
+  { name: 'Employees', href: '#', icon: Users, current: false },
+  
 ];
 
 export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
@@ -69,7 +79,9 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
                   collapsed ? 'm-auto justify-center' : 'justify-start',
                 )}
               >
-                <DollarSign className="text-primary size-8" />
+                {/* <DollarSign className="text-primary size-8" /> */}
+                <BroomSparkles className="text-primary size-8" />
+                {/* <FaBroomSparkles className="text-primary" /> */}
                 {!collapsed && (
                   <h1 className="text-2xl font-medium">MCFS</h1>
                 )}

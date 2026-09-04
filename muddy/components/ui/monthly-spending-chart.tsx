@@ -10,12 +10,12 @@ import {
 } from 'recharts';
 
 const data = [
-  { name: 'Food & Dining', value: 320, color: '#3b82f6' },
-  { name: 'Transportation', value: 180, color: '#10b981' },
-  { name: 'Entertainment', value: 120, color: '#8b5cf6' },
-  { name: 'Shopping', value: 450, color: '#ef4444' },
-  { name: 'Utilities', value: 220, color: '#f59e0b' },
-  { name: 'Healthcare', value: 150, color: '#ec4899' },
+  { name: 'Soap', value: 320, color: '#3b82f6' },
+  { name: 'Brushes', value: 180, color: '#10b981' },
+  { name: 'Reflectors', value: 120, color: '#8b5cf6' },
+  { name: 'Buckets', value: 450, color: '#ef4444' },
+  { name: 'Transport', value: 220, color: '#f59e0b' },
+  { name: 'Attendance', value: 150, color: '#ec4899' },
 ];
 
 interface CustomTooltipProps {
@@ -50,7 +50,7 @@ export default function MonthlySpendingChart() {
   return (
     <Card className="from-secondary/30 rounded-lg bg-gradient-to-t shadow-none">
       <CardHeader>
-        <CardTitle>Monthly Spending by Category</CardTitle>
+        <CardTitle>Monthly Performance</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-40 md:h-60">

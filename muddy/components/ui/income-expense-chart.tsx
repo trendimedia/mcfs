@@ -21,15 +21,15 @@ export default function IncomeExpenseChart() {
   return (
     <Card className="from-secondary/30 rounded-lg bg-gradient-to-t shadow-none">
       <CardHeader className="flex flex-col items-center justify-between gap-3 md:flex-row">
-        <CardTitle>Income vs Expenses</CardTitle>
+        <CardTitle>Present vs Absent</CardTitle>
         <div className="flex items-center justify-center gap-2">
           <div className="flex items-center gap-2">
             <div className="size-3 rounded-full bg-green-500"></div>
-            <span>Income</span>
+            <span>Present</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="size-3 rounded-full bg-red-500"></div>
-            <span>Expenses</span>
+            <span>Absent</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="size-3 rounded-full bg-blue-500"></div>

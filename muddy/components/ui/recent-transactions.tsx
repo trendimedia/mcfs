@@ -13,93 +13,93 @@ import {
 const transactions = [
   {
     id: 1,
-    description: 'Grocery Store',
+    description: 'Annual Vacation Leave',
     amount: -85.2,
-    category: 'Food & Dining',
+    category: 'Paid Time Off',
     date: '2024-01-15',
     type: 'expense',
-    merchant: 'Whole Foods',
+    merchant: 'HR Dept',
   },
   {
     id: 2,
-    description: 'Salary Deposit',
+    description: 'Earned Leave Accrual',
     amount: 3200.0,
-    category: 'Income',
+    category: 'Accrual',
     date: '2024-01-14',
     type: 'income',
-    merchant: 'Company Inc',
+    merchant: 'Payroll System',
   },
   {
     id: 3,
-    description: 'Netflix Subscription',
+    description: 'Medical Sick Leave',
     amount: -15.99,
-    category: 'Entertainment',
+    category: 'Sick Leave',
     date: '2024-01-13',
     type: 'expense',
-    merchant: 'Netflix',
+    merchant: 'Health Services',
   },
   {
     id: 4,
-    description: 'Gas Station',
+    description: 'Casual Personal Leave',
     amount: -45.0,
-    category: 'Transportation',
+    category: 'Casual Leave',
     date: '2024-01-12',
     type: 'expense',
-    merchant: 'Shell',
+    merchant: 'HR Dept',
   },
   {
     id: 5,
-    description: 'Freelance Work',
+    description: 'Rollover Balance Adjustment',
     amount: 850.0,
-    category: 'Income',
+    category: 'Accrual',
     date: '2024-01-11',
     type: 'income',
-    merchant: 'Client Co',
+    merchant: 'HR Ops',
   },
   {
     id: 6,
-    description: 'Coffee Shop',
+    description: 'Doctor Appointment Half-Day',
     amount: -12.5,
-    category: 'Food & Dining',
+    category: 'Sick Leave',
     date: '2024-01-10',
     type: 'expense',
-    merchant: 'Starbucks',
+    merchant: 'Medical Clinic',
   },
   {
     id: 7,
-    description: 'Stock Dividend',
+    description: 'Overtime Compensation Time',
     amount: 120.0,
-    category: 'Income',
+    category: 'Accrual',
     date: '2024-01-09',
     type: 'income',
-    merchant: 'Investments LLC',
+    merchant: 'Resource Mgmt',
   },
   {
     id: 8,
-    description: 'Gym Membership',
+    description: 'Bereavement Leave',
     amount: -35.0,
-    category: 'Health & Fitness',
+    category: 'Special Leave',
     date: '2024-01-08',
     type: 'expense',
-    merchant: 'Gym Co',
+    merchant: 'HR Dept',
   },
   {
     id: 9,
-    description: 'Dining Out',
+    description: 'Parental Leave Request',
     amount: -60.0,
-    category: 'Food & Dining',
+    category: 'Parental Leave',
     date: '2024-01-07',
     type: 'expense',
-    merchant: 'Olive Garden',
+    merchant: 'People Ops',
   },
   {
     id: 10,
-    description: 'Project Bonus',
+    description: 'Performance Days Awarded',
     amount: 500.0,
-    category: 'Income',
+    category: 'Accrual',
     date: '2024-01-06',
     type: 'income',
-    merchant: 'Client Inc',
+    merchant: 'Executive Team',
   },
 ];
 
@@ -112,12 +112,12 @@ export default function RecentTransactions() {
             <History className="size-10" />
             <div className="flex flex-col items-start gap-1">
               <CardTitle>
-                <span>Recent 10 Transactions</span>
+                <span>Leave Requests</span>
               </CardTitle>
               <span className="text-muted-foreground text-xs italic">
                 <span className="text-green-500">Green</span> means gain,{' '}
-                <span className="text-red-500">Red</span> means spend - track
-                your flow easily
+                <span className="text-red-500">Red</span> means minus - track
+                efficiency easily in your organisation
               </span>
             </div>
           </div>

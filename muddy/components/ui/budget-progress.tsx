@@ -19,14 +19,14 @@ const categories = [
     icon: '🚗',
   },
   {
-    name: 'Entertainment',
+    name: 'Gifts',
     spent: 120,
     budget: 200,
     color: 'bg-purple-500',
     icon: '🎬',
   },
   {
-    name: 'Shopping',
+    name: 'Shopping Vouchers',
     spent: 450,
     budget: 400,
     color: 'bg-red-500',
@@ -40,7 +40,7 @@ const categories = [
     icon: '💡',
   },
   {
-    name: 'Healthcare',
+    name: 'Self Care',
     spent: 150,
     budget: 200,
     color: 'bg-pink-500',
