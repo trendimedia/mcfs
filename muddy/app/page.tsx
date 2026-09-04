@@ -3,7 +3,7 @@ import LoginForm1 from "@/components/mvpblocks/login-form1";
 
 export default function Home() {
   return (
-    <div>
+    <div className="mt-16 py-8">
       <LoginForm1 />
     </div>
   );

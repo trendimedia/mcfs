@@ -19,7 +19,7 @@ export default function LoginForm1() {
             <h3 className="text-2xl font-bold sm:text-3xl">
               Log in to your account
             </h3>
-            <p className="">
+            <p className="mt-8">
               Don&apos;t have an account?{' '}
               <a
                 href="#"
@@ -31,7 +31,7 @@ export default function LoginForm1() {
           </div>
         </div>
         <div className="space-y-6 p-4 py-6 shadow sm:rounded-lg sm:p-6">
-          <div className="grid grid-cols-3 gap-x-3">
+          {/* <div className="grid grid-cols-3 gap-x-3">
             <button
               aria-label="Sign in with Google"
               className="hover:bg-secondary active:bg-secondary/40 flex items-center justify-center rounded-lg border py-2.5 duration-150"
@@ -89,7 +89,7 @@ export default function LoginForm1() {
             >
               <FaGithub size={24} />
             </button>
-          </div>
+          </div> */}
           <div className="relative">
             <span className="bg-secondary block h-px w-full"></span>
             <p className="absolute inset-x-0 -top-2 mx-auto inline-block w-fit px-2 text-sm">
