@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle2, ArrowRight, ArrowLeft, Calendar } from 'lucide-react';
+import { submitLeaveRequest } from '@/app/leave/action';
+//import { submitLeaveRequest } from '@/app/leave/actions';
 
 // Step 1: Employee & Leave Type Selection
 const leaveTypeSchema = z.object({
@@ -170,7 +172,7 @@ export default function MultiStepLeaveForm({
 
   const progress = ((step + 1) / steps.length) * 100;
 
-  const handleNextStep = (data: any) => {
+  const handleNextStep = async (data: any) => {
     const updatedData = { ...formData, ...data };
     setFormData(updatedData);
 
@@ -179,13 +181,18 @@ export default function MultiStepLeaveForm({
       reset(updatedData);
     } else {
       setIsSubmitting(true);
-      setTimeout(() => {
+      try {
         if (onSubmit) {
-          onSubmit(updatedData as FormData);
+          await onSubmit(updatedData as FormData);
+        } else {
+          await submitLeaveRequest(updatedData as any);
         }
         setIsComplete(true);
+      } catch (err) {
+        console.error('Failed to submit leave request:', err);
+      } finally {
         setIsSubmitting(false);
-      }, 1500);
+      }
     }
   };
 
