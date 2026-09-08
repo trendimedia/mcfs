@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Bell, User, Calendar, Moon, Sun, DollarSign, BroomSparkles } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -10,11 +11,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { authClient } from '@/lib/auth/client';
 
 export default function Header() {
   const [currentDate, setCurrentDate] = useState<string>('');
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -30,10 +33,15 @@ export default function Header() {
     setCurrentDate(formattedDate);
   }, []);
 
+  const handleLogout = async () => {
+    await authClient.signOut();
+    router.push('/'); // adjust to wherever login-form1 actually lives, e.g. '/'
+    router.refresh();
+  };
+
   return (
     <header className="bg-background/80 fixed top-0 left-0 z-50 w-full border-b backdrop-blur-md">
       <div className="flex w-full items-center justify-between px-3 py-3 md:px-6">
-        {/* Desktop and tablet layout */}
         <div className="m-auto flex w-full items-center justify-center text-center">
           {currentDate && (
             <div className="text-muted-foreground hidden w-full items-center gap-2 text-xs md:flex md:text-sm">
@@ -41,12 +49,7 @@ export default function Header() {
               <span>{currentDate}</span>
             </div>
           )}
-          <div
-            className={cn(
-              'm-auto flex w-full items-center justify-center gap-1.5 text-center md:hidden',
-            )}
-          >
-            {/* <DollarSign className="text-primary" /> */}
+          <div className={cn('m-auto flex w-full items-center justify-center gap-1.5 text-center md:hidden')}>
             <BroomSparkles className="text-primary" />
             <h1 className="text-xl font-medium">MCFS</h1>
           </div>
@@ -57,12 +60,7 @@ export default function Header() {
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               aria-label="Toggle theme"
             >
-              {mounted &&
-                (theme === 'dark' ? (
-                  <Sun className="size-5" />
-                ) : (
-                  <Moon className="size-5" />
-                ))}
+              {mounted && (theme === 'dark' ? <Sun className="size-5" /> : <Moon className="size-5" />)}
             </Button>
           </div>
         </div>
@@ -74,11 +72,7 @@ export default function Header() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="relative rounded-sm"
-              >
+              <Button variant="outline" size="icon" className="relative rounded-sm">
                 <User className="size-5" />
               </Button>
             </DropdownMenuTrigger>
@@ -89,7 +83,10 @@ export default function Header() {
               <DropdownMenuItem className="hover:!bg-primary rounded hover:!text-white">
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuItem className="hover:!bg-primary rounded hover:!text-white">
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="hover:!bg-primary rounded hover:!text-white"
+              >
                 Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -101,12 +98,7 @@ export default function Header() {
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             aria-label="Toggle theme"
           >
-            {mounted &&
-              (theme === 'dark' ? (
-                <Sun className="size-5" />
-              ) : (
-                <Moon className="size-5" />
-              ))}
+            {mounted && (theme === 'dark' ? <Sun className="size-5" /> : <Moon className="size-5" />)}
           </Button>
         </div>
       </div>

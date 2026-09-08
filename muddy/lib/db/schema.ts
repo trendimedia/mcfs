@@ -1,5 +1,5 @@
 // db/schema.ts
-import { pgTable, uuid, text, date, timestamp, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, date, timestamp, pgEnum, boolean } from 'drizzle-orm/pg-core';
 
 export const leaveStatusEnum = pgEnum('leave_status', ['pending', 'approved', 'rejected']);
 
@@ -23,5 +23,44 @@ export const leaveRequests = pgTable('leave_requests', {
   emergencyContactName: text('emergency_contact_name').notNull(),
   emergencyContactPhone: text('emergency_contact_phone').notNull(),
   status: leaveStatusEnum('status').default('pending').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const userRoleEnum = pgEnum('user_role', [
+  'employee',
+  'manager',
+  'hr',
+  'admin',
+]);
+
+export const users = pgTable('users', {
+  id: uuid('id').defaultRandom().primaryKey(),
+
+  email: text('email').notNull().unique(),
+
+  passwordHash: text('password_hash').notNull(),
+
+  role: userRoleEnum('role').default('employee').notNull(),
+
+  employeeCode: text('employee_code'),
+
+  isActive: boolean('is_active').default(true).notNull(),
+
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const sessions = pgTable('sessions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+
+  tokenHash: text('token_hash').notNull().unique(),
+
+  expiresAt: timestamp('expires_at').notNull(),
+
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
