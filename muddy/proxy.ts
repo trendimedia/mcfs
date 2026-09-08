@@ -2,7 +2,7 @@
 import { auth } from '@/lib/auth/server';
 
 export default auth.middleware({
-  loginUrl: '/', // wherever your login-form1 page lives
+  loginUrl: '/dashboard', // wherever your login-form1 page lives
 });
 
 export const config = {
