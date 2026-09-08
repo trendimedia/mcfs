@@ -11,7 +11,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import { authClient } from '@/lib/auth/client';
+import { logout } from '@/app/actions/auth';
+//import { authClient } from '@/lib/auth/client';
+//import { logout } from '@/lib/auth';
 
 export default function Header() {
   const [currentDate, setCurrentDate] = useState<string>('');
@@ -34,10 +36,8 @@ export default function Header() {
   }, []);
 
   const handleLogout = async () => {
-    await authClient.signOut();
-    router.push('/'); // adjust to wherever login-form1 actually lives, e.g. '/'
-    router.refresh();
-  };
+  await logout();
+};
 
   return (
     <header className="bg-background/80 fixed top-0 left-0 z-50 w-full border-b backdrop-blur-md">

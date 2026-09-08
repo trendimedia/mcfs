@@ -28,7 +28,7 @@ interface SidebarProps {
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '#', icon: LayoutDashboard, current: true },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, current: true },
   { name: 'Payroll', href: '#', icon: Wallet, current: false },
   { name: 'Attendance', href: '#', icon: BarChart3, current: false },
   { name: 'Absence Management', href: '#', icon: CalendarCheck, current: false },

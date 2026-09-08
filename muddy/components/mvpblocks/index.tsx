@@ -8,7 +8,7 @@ import StatsCards from '../ui/stats-cards';
 
 export default function PersonalFinanceDashboard() {
   return (
-    <DashboardLayout>
+    // <DashboardLayout>
       <div className="space-y-3 md:space-y-6">
         {/* Stats Overview */}
         <StatsCards />
@@ -26,6 +26,6 @@ export default function PersonalFinanceDashboard() {
         </div>
         <RecentTransactions />
       </div>
-    </DashboardLayout>
+    // </DashboardLayout>
   );
 }

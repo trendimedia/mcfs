@@ -1,12 +1,16 @@
-import PersonalFinanceDashboard from '@/components/mvpblocks'
-import React from 'react'
 
-const page = () => {
+import PersonalFinanceDashboard from '@/components/mvpblocks';
+import { requireRole } from '@/lib/auth/authorization';
+
+const page = async () => {
+  await requireRole('admin');
+
   return (
     <div>
-        <PersonalFinanceDashboard />
+      <PersonalFinanceDashboard />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;
+
