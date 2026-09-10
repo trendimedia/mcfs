@@ -64,3 +64,20 @@ export const sessions = pgTable('sessions', {
 
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
+
+
+export const applications = pgTable('applications', {
+  id: uuid('id').defaultRandom().primaryKey(),
+
+  firstName: text('first_name').notNull(),
+  lastName: text('last_name').notNull(),
+  email: text('email').notNull(),
+
+  address: text('address').notNull(),
+  city: text('city').notNull(),
+  zipCode: text('zip_code').notNull(),
+
+  status: text('status').default('pending').notNull(),
+
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});

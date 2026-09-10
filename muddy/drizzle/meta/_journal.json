@@ -15,6 +15,13 @@
       "when": 1788842790789,
       "tag": "0001_spooky_scream",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789026314530,
+      "tag": "0002_clumsy_firebird",
+      "breakpoints": true
     }
   ]
 }

@@ -31,13 +31,13 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, current: true },
   { name: 'Payroll', href: '#', icon: Wallet, current: false },
   { name: 'Attendance', href: '#', icon: BarChart3, current: false },
-  { name: 'Absence Management', href: '#', icon: CalendarCheck, current: false },
-  { name: 'Advance & Overtime', href: '#', icon: DollarSign, current: false },
-  { name: 'Perfomance', href: '#', icon: Rocket, current: false },
-  { name: 'Termination', href: '#', icon: BarChart3, current: false },
-  { name: 'Applications', href: '#', icon: Box, current: false },
-  { name: 'Leave Management', href: '#', icon: Clock, current: false },
-  { name: 'Employees', href: '#', icon: Users, current: false },
+  { name: 'Absence Management', href: '/dashboard/abscence', icon: CalendarCheck, current: false },
+  { name: 'Advance & Overtime', href: '/dashboard/advance', icon: DollarSign, current: false },
+  { name: 'Perfomance', href: '/dashboard/performance', icon: Rocket, current: false },
+  { name: 'Termination', href: '/dashboard/termination', icon: BarChart3, current: false },
+  { name: 'Applications', href: '/dashboard/applications', icon: Box, current: false },
+  { name: 'Leave Management', href: '/leave', icon: Clock, current: false },
+  { name: 'Employees', href: '/employee', icon: Users, current: false },
   
 ];
 
