@@ -1,5 +1,5 @@
 // db/schema.ts
-import { pgTable, uuid, text, date, timestamp, pgEnum, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, date, timestamp, pgEnum, boolean, numeric } from 'drizzle-orm/pg-core';
 
 export const leaveStatusEnum = pgEnum('leave_status', ['pending', 'approved', 'rejected']);
 
@@ -66,18 +66,52 @@ export const sessions = pgTable('sessions', {
 });
 
 
+export const applicationStatusEnum = pgEnum('application_status', [
+  'pending',
+  'reviewed',
+  'shortlisted',
+  'rejected',
+  'hired',
+]);
+
 export const applications = pgTable('applications', {
   id: uuid('id').defaultRandom().primaryKey(),
 
   firstName: text('first_name').notNull(),
   lastName: text('last_name').notNull(),
   email: text('email').notNull(),
+  mobileNumber: text('mobile_number').notNull(),
 
   address: text('address').notNull(),
   city: text('city').notNull(),
-  zipCode: text('zip_code').notNull(),
+  location: text('location').notNull(),
+  position: text('position').notNull(),
 
-  status: text('status').default('pending').notNull(),
+  nextOfKinName: text('next_of_kin_name').notNull(),
+  nextOfKinPhone: text('next_of_kin_phone').notNull(),
 
+  status: applicationStatusEnum('status').default('pending').notNull(),
+
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const attendanceStatusEnum = pgEnum('attendance_status', ['present', 'absent', 'half_day']);
+
+export const attendance = pgTable('attendance', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  employeeCode: text('employee_code').notNull(),
+  date: date('date').notNull(),
+  status: attendanceStatusEnum('status').notNull(),
+  markedBy: text('marked_by'), // employeeCode of whoever marked it — null/self if self-check-in
+  markedAt: timestamp('marked_at').defaultNow().notNull(),
+});
+
+export const performance = pgTable('performance', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  employeeCode: text('employee_code').notNull(),
+  month: text('month').notNull(), // e.g. '2026-09'
+  scorePercent: numeric('score_percent').notNull(),
+  notes: text('notes'),
+  reviewedBy: text('reviewed_by'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
