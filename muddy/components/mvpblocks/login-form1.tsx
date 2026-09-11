@@ -29,7 +29,7 @@ export default function LoginForm1() {
             <p className="mt-8">
               Don&apos;t have an account?{' '}
               <a
-                href="#"
+                href="/sign-up"
                 className="font-medium text-rose-600 hover:text-rose-500"
               >
                 Sign up

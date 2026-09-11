@@ -35,19 +35,12 @@ export const userRoleEnum = pgEnum('user_role', [
 
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
-
   email: text('email').notNull().unique(),
-
-  passwordHash: text('password_hash').notNull(),
-
+  passwordHash: text('password_hash'), // nullable — actual credential lives in Neon Auth now
   role: userRoleEnum('role').default('employee').notNull(),
-
-  employeeCode: text('employee_code'),
-
+  employeeCode: text('employee_code').unique(),
   isActive: boolean('is_active').default(true).notNull(),
-
   createdAt: timestamp('created_at').defaultNow().notNull(),
-
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
