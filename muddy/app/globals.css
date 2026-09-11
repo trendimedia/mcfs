@@ -66,6 +66,17 @@
   --color-destructive-foreground: var(--destructive-foreground);
 }
 
+.fc-bg-success { background-color: #22c55e !important; color: white; }
+.fc-bg-danger { background-color: #ef4444 !important; color: white; }
+.fc-bg-warning { background-color: #eab308 !important; color: white; }
+.fc-bg-primary { background-color: #3b82f6 !important; color: white; }
+
+.event-fc-color {
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);

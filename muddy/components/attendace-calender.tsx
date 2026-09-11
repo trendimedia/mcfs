@@ -10,7 +10,6 @@ import { EventInput, DateSelectArg, EventClickArg, EventContentArg } from "@full
 import { useModal } from "@/hooks/useModal";
 import { Modal } from "@/components/ui/modal";
 import { markAttendance } from "@/app/profile/action";
-//import { markAttendance } from "@/app/dashboard/profile/action";
 
 interface AttendanceCalendarEvent extends EventInput {
   extendedProps: { calendar: string };
@@ -62,18 +61,30 @@ export default function AttendanceCalendar({
   };
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
-    if (!isAdmin && selectInfo.startStr !== todayStr) {
+    const clickedDate = selectInfo.startStr;
+
+    if (clickedDate > todayStr) {
+      alert("You can't mark attendance for a future date.");
+      return;
+    }
+
+    if (!isAdmin && clickedDate !== todayStr) {
       alert("You can only mark today's attendance.");
       return;
     }
+
     resetModalFields();
-    setSelectedDate(selectInfo.startStr);
+    setSelectedDate(clickedDate);
     openModal();
   };
 
   const handleEventClick = (clickInfo: EventClickArg) => {
     const dateStr = clickInfo.event.startStr;
-    if (!isAdmin && dateStr !== todayStr) return;
+
+    if (dateStr > todayStr) return; // future — block silently, re-clicking an existing event
+
+    if (!isAdmin && dateStr !== todayStr) return; // non-admins can only touch today
+
     setSelectedDate(dateStr);
     openModal();
   };
