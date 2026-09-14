@@ -1,7 +1,12 @@
 // db/schema.ts
-import { pgTable, uuid, text, date, timestamp, pgEnum, boolean, numeric } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, date, timestamp, pgEnum, boolean, numeric, pgSequence } from 'drizzle-orm/pg-core';
 
 export const leaveStatusEnum = pgEnum('leave_status', ['pending', 'approved', 'rejected']);
+
+export const employeeCodeSeq = pgSequence('employee_code_seq', {
+  startWith: 1,
+  increment: 1,
+});
 
 export const leaveTypeEnum = pgEnum('leave_type', [
   'Annual Leave',

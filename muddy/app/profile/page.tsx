@@ -9,7 +9,7 @@ import AttendanceCalendar from '@/components/attendace-calender';
 
 export default async function ProfilePage() {
   const me = await getCurrentUser();
-  if (!me) redirect('/login');
+  if (!me) redirect('/');
   if (!me.employeeCode) return <p>No employee record linked to your account yet.</p>;
 
   const now = new Date();

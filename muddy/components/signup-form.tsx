@@ -37,34 +37,25 @@ export function SignupForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+  e.preventDefault();
+  setError('');
+  setIsSubmitting(true);
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters long');
-      return;
-    }
+  const { error: signInError } = await authClient.signIn.email({
+    email,
+    password,
+  });
 
-    setIsSubmitting(true);
+  setIsSubmitting(false);
 
-    const { error: signUpError } = await authClient.signUp.email({ email, password, name });
+  if (signInError) {
+    setError(signInError.message ?? 'Invalid email or password');
+    return;
+  }
 
-    if (signUpError) {
-      setIsSubmitting(false);
-      setError(signUpError.message ?? 'Could not create account');
-      return;
-    }
-
-    await completeSignup(email);
-
-    setIsSubmitting(false);
-    router.push('/profile');
-    router.refresh();
-  };
+  router.push('/dashboard');
+  router.refresh();
+};
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
