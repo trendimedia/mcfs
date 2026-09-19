@@ -7,6 +7,7 @@ import { eq } from 'drizzle-orm';
 
 import { db } from '@/lib/db';
 import { sessions, users } from '@/lib/db/schema';
+import { auth } from '@/lib/auth/server';
 
 const SESSION_COOKIE = 'mcfs_session';
 const SESSION_DURATION = 30 * 24 * 60 * 60 * 1000;
@@ -45,45 +46,68 @@ export async function getCurrentSession() {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
 
-  if (!token) {
-    return null;
+  if (token) {
+    const tokenHash = hashToken(token);
+
+    const result = await db
+      .select({
+        sessionId: sessions.id,
+        sessionExpiresAt: sessions.expiresAt,
+        user: users,
+      })
+      .from(sessions)
+      .innerJoin(users, eq(sessions.userId, users.id))
+      .where(eq(sessions.tokenHash, tokenHash))
+      .limit(1);
+
+    const session = result[0];
+
+    if (session) {
+      if (session.sessionExpiresAt <= new Date()) {
+        await db.delete(sessions).where(eq(sessions.id, session.sessionId));
+        cookieStore.delete(SESSION_COOKIE);
+        return null;
+      }
+
+      if (!session.user.isActive) {
+        await db.delete(sessions).where(eq(sessions.id, session.sessionId));
+        cookieStore.delete(SESSION_COOKIE);
+        return null;
+      }
+
+      return {
+        sessionId: session.sessionId,
+        expiresAt: session.sessionExpiresAt,
+        user: session.user,
+      };
+    }
   }
 
-  const tokenHash = hashToken(token);
+  const { data: neonSession } = await auth.getSession();
+  const email = neonSession?.user?.email?.toLowerCase();
+
+  if (!email) {
+    return null;
+  }
 
   const result = await db
-    .select({
-      sessionId: sessions.id,
-      sessionExpiresAt: sessions.expiresAt,
-      user: users,
-    })
-    .from(sessions)
-    .innerJoin(users, eq(sessions.userId, users.id))
-    .where(eq(sessions.tokenHash, tokenHash))
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
     .limit(1);
 
-  const session = result[0];
+  const user = result[0];
 
-  if (!session) {
+  if (!user || !user.isActive) {
     return null;
   }
 
-  if (session.sessionExpiresAt <= new Date()) {
-    await db.delete(sessions).where(eq(sessions.id, session.sessionId));
-    cookieStore.delete(SESSION_COOKIE);
-    return null;
-  }
-
-  if (!session.user.isActive) {
-    await db.delete(sessions).where(eq(sessions.id, session.sessionId));
-    cookieStore.delete(SESSION_COOKIE);
-    return null;
-  }
+  await createSession(user.id);
 
   return {
-    sessionId: session.sessionId,
-    expiresAt: session.sessionExpiresAt,
-    user: session.user,
+    sessionId: user.id,
+    expiresAt: new Date(Date.now() + SESSION_DURATION),
+    user,
   };
 }
 
@@ -91,7 +115,7 @@ export async function requireSession() {
   const session = await getCurrentSession();
 
   if (!session) {
-    redirect('/');
+    redirect('/sign-up');
   }
 
   return session;

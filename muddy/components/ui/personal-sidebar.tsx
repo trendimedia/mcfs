@@ -3,7 +3,6 @@ import { Dispatch, SetStateAction, useState } from 'react';
 import {
   LayoutDashboard,
   Wallet,
-  Target,
   BarChart3,
   Users,
   CalendarCheck,
@@ -16,7 +15,6 @@ import {
   Box,
   Clock,
   Rocket,
-  
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -25,24 +23,37 @@ import { Button } from '@/components/ui/button';
 interface SidebarProps {
   collapsed: boolean;
   setCollapsed: Dispatch<SetStateAction<boolean>>;
+  role?: 'admin' | 'manager' | 'employee' | 'hr';
 }
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, current: true },
-  { name: 'Payroll', href: '#', icon: Wallet, current: false },
-  { name: 'Attendance', href: '#', icon: BarChart3, current: false },
+  { name: 'Payroll', href: '/dashboard/payroll', icon: Wallet, current: false },
+  { name: 'Attendance', href: '/attendance', icon: BarChart3, current: false },
   { name: 'Absence Management', href: '/dashboard/abscence', icon: CalendarCheck, current: false },
   { name: 'Advance & Overtime', href: '/dashboard/advance', icon: DollarSign, current: false },
-  { name: 'Perfomance', href: '/dashboard/performance', icon: Rocket, current: false },
+  { name: 'Performance', href: '/dashboard/performance', icon: Rocket, current: false },
   { name: 'Termination', href: '/dashboard/termination', icon: BarChart3, current: false },
   { name: 'Applications', href: '/dashboard/applications', icon: Box, current: false },
   { name: 'Leave Management', href: '/leave', icon: Clock, current: false },
   { name: 'Employees', href: '/employee', icon: Users, current: false },
-  
 ];
 
-export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
+const employeeNavigation = [
+  { name: 'Profile', href: '/profile', icon: User, current: true },
+  { name: 'Attendance', href: '/attendance', icon: BarChart3, current: false },
+  { name: 'Leave', href: '/leave', icon: Clock, current: false },
+];
+
+export default function Sidebar({ collapsed, setCollapsed, role = 'manager' }: SidebarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navItems =
+    role === 'employee'
+      ? employeeNavigation
+      : role === 'admin'
+        ? [...navigation, { name: 'Administration', href: '/admin', icon: Users, current: false }]
+        : navigation;
 
   return (
     <>
@@ -97,7 +108,7 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
 
           {/* Navigation */}
           <nav className="flex-1 space-y-2 p-2 pt-4 md:p-4">
-            {navigation.map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}

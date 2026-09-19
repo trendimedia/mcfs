@@ -9,7 +9,7 @@ import AttendanceCalendar from '@/components/attendace-calender';
 
 export default async function ProfilePage() {
   const me = await getCurrentUser();
-  if (!me) redirect('/');
+  if (!me) redirect('/sign-up');
   if (!me.employeeCode) return <p>No employee record linked to your account yet.</p>;
 
   const now = new Date();
@@ -43,7 +43,7 @@ export default async function ProfilePage() {
       </div>
 
       <div className="rounded-lg border p-4">
-        <h2 className="font-semibold mb-2">This Month's Performance</h2>
+        <h2 className="font-semibold mb-2">This Month&apos;s Performance</h2>
         <p className="text-3xl font-bold">{performancePercent}%</p>
         <p className="text-sm text-muted-foreground">{presentCount} present out of {totalMarked} marked days</p>
       </div>
@@ -53,7 +53,10 @@ export default async function ProfilePage() {
           Attendance Calendar — {now.toLocaleString('default', { month: 'long', year: 'numeric' })}
         </h2>
         <AttendanceCalendar
-          initialEvents={monthRows.map((r) => ({ date: r.date, status: r.status as any }))}
+          initialEvents={monthRows.map((r) => ({
+            date: r.date,
+            status: r.status as 'present' | 'absent' | 'half_day',
+          }))}
           employeeCode={me.employeeCode}
           isAdmin={isAdmin}
         />

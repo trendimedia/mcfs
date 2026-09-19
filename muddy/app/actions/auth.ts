@@ -2,74 +2,89 @@
 
 import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
-import { z } from 'zod';
 
 import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
-import { verifyPassword } from '@/lib/auth/password';
-import {
-  createSession,
-  deleteCurrentSession,
-} from '@/lib/auth/session';
-
-const loginSchema = z.object({
-  email: z.string().trim().email(),
-  password: z.string().min(1),
-});
+import { createSession, deleteCurrentSession } from '@/lib/auth/session';
+import { ensureWelcomeNotificationForRole, notifyAdminsAndManagers } from '@/lib/notifications';
 
 export type LoginState = {
   error?: string;
 };
 
-export async function login(
-  _previousState: LoginState,
-  formData: FormData,
-): Promise<LoginState> {
-  const parsed = loginSchema.safeParse({
-    email: formData.get('email'),
-    password: formData.get('password'),
-  });
+export async function getPostLoginPath(email: string): Promise<string> {
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, email.toLowerCase()))
+    .limit(1);
 
-  if (!parsed.success) {
-    return {
-      error: 'Enter a valid email address and password.',
-    };
+  const user = result[0];
+
+  if (!user) {
+    return '/profile';
   }
 
-  const email = parsed.data.email.toLowerCase();
+  if (user.role === 'employee') {
+    return '/profile';
+  }
+
+  if (user.role === 'admin') {
+    return '/admin';
+  }
+
+  return '/dashboard';
+}
+
+export async function syncAppSession(email: string): Promise<boolean> {
+  const normalizedEmail = email.trim().toLowerCase();
 
   const result = await db
     .select()
     .from(users)
-    .where(eq(users.email, email))
+    .where(eq(users.email, normalizedEmail))
     .limit(1);
 
   const user = result[0];
 
   if (!user || !user.isActive) {
-    return {
-      error: 'Invalid email or password.',
-    };
-  }
-
-  const validPassword = await verifyPassword(
-    parsed.data.password,
-    user.passwordHash,
-  );
-
-  if (!validPassword) {
-    return {
-      error: 'Invalid email or password.',
-    };
+    return false;
   }
 
   await createSession(user.id);
 
-  redirect('/dashboard');
+  if (['admin', 'manager'].includes(user.role)) {
+    await notifyAdminsAndManagers({
+      title: 'User login',
+      message: `${user.email} signed in to the system.`,
+      type: 'login',
+      source: 'auth',
+      actorEmail: user.email,
+    });
+
+    if (user.role === 'admin' || user.role === 'manager') {
+      await ensureWelcomeNotificationForRole(user.role);
+    }
+  }
+
+  return true;
+}
+
+export async function login(
+  previousState: LoginState,
+  formData: FormData,
+): Promise<LoginState> {
+  void previousState;
+  void formData;
+
+  return {
+    error:
+      'This legacy login action has been disabled. Use the Neon Auth sign-in flow on the home page.',
+  };
 }
 
 export async function logout() {
   await deleteCurrentSession();
 
-  redirect('/');
+  redirect('/sign-up');
 }

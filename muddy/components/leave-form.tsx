@@ -18,15 +18,16 @@ import { submitLeaveRequest } from '@/app/leave/action';
 const leaveTypeSchema = z.object({
   employeeId: z.string().min(3, 'Employee ID is required'),
   department: z.string().min(2, 'Department is required'),
-  leaveType: z.enum([
-    'Annual Leave',
-    'Sick Leave',
-    'Casual Leave',
-    'Maternity/Paternity Leave',
-    'Unpaid Leave',
-  ], {
-    required_error: 'Please select a leave type',
-  }),
+  leaveType: z.enum(
+    [
+      'Annual Leave',
+      'Sick Leave',
+      'Casual Leave',
+      'Maternity/Paternity Leave',
+      'Unpaid Leave',
+    ],
+    { message: 'Please select a leave type' },
+  ),
 });
 
 // Step 2: Date Selection & Details
@@ -73,7 +74,17 @@ export default function MultiStepLeaveForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
 
-  const steps = [
+  type StepField =
+    | { name: string; label: string; type: 'text' | 'date' | 'textarea' | 'tel'; placeholder?: string }
+    | { name: string; label: string; type: 'select'; options: string[] };
+
+  const steps: Array<{
+    id: string;
+    title: string;
+    description: string;
+    schema: z.ZodTypeAny;
+    fields: StepField[];
+  }> = [
     {
       id: 'type',
       title: 'Leave Details',

@@ -1,10 +1,12 @@
 // components/signup-form.tsx
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { cn } from 'cn';
 
+import { getPostLoginPath } from '@/app/actions/auth';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -37,25 +39,70 @@ export function SignupForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError('');
-  setIsSubmitting(true);
+    e.preventDefault();
+    setError('');
 
-  const { error: signInError } = await authClient.signIn.email({
-    email,
-    password,
-  });
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long.');
+      return;
+    }
 
-  setIsSubmitting(false);
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
 
-  if (signInError) {
-    setError(signInError.message ?? 'Invalid email or password');
-    return;
-  }
+    setIsSubmitting(true);
 
-  router.push('/dashboard');
-  router.refresh();
-};
+    try {
+      const { data, error: signUpError } = await authClient.signUp.email({
+        email,
+        password,
+        name,
+      });
+
+      if (signUpError) {
+        const isDuplicate = /already exists|use another email/i.test(
+          signUpError.message ?? '',
+        );
+
+        if (isDuplicate) {
+          const { error: signInError } = await authClient.signIn.email({
+            email,
+            password,
+          });
+
+          if (signInError) {
+            setError('An account with this email already exists. Please sign in instead.');
+            return;
+          }
+
+          await completeSignup(email);
+          router.push('/');
+          router.refresh();
+          return;
+        }
+
+        setError(signUpError.message ?? 'Could not create account');
+        return;
+      }
+
+      if (data?.user?.email) {
+        await completeSignup(data.user.email);
+      }
+
+      router.push('/');
+      router.refresh();
+    } catch (caughtError) {
+      const message =
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'Could not create account';
+      setError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -128,7 +175,7 @@ export function SignupForm({
                   {isSubmitting ? 'Creating account...' : 'Create Account'}
                 </Button>
                 <FieldDescription className="text-center">
-                  Already have an account? <a href="/">Sign in</a>
+                  Already have an account? <Link href="/">Sign in</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

@@ -5,6 +5,7 @@ import { db } from '@/lib/db';
 import { attendance } from '@/lib/db/schema';
 import { getCurrentUser } from '@/lib/auth/current-user';
 import { revalidatePath } from 'next/cache';
+import { notifyAdminsAndManagers } from '@/lib/notifications';
 
 type Status = 'present' | 'absent' | 'half_day';
 
@@ -33,5 +34,14 @@ export async function markAttendance(date: string, status: Status, targetEmploye
   const employeeCode = isAdmin && targetEmployeeCode ? targetEmployeeCode : me.employeeCode;
 
   await db.insert(attendance).values({ employeeCode, date, status, markedBy: me.employeeCode });
+
+  await notifyAdminsAndManagers({
+    title: 'Attendance updated',
+    message: `${me.email} marked ${employeeCode} as ${status} for ${date}.`,
+    type: 'form',
+    source: 'attendance',
+    actorEmail: me.email,
+  });
+
   revalidatePath('/profile');
 }

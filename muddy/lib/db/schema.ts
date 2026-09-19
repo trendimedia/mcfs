@@ -1,5 +1,6 @@
 // db/schema.ts
 import { pgTable, uuid, text, date, timestamp, pgEnum, boolean, numeric, pgSequence } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 
 export const leaveStatusEnum = pgEnum('leave_status', ['pending', 'approved', 'rejected']);
 
@@ -112,4 +113,19 @@ export const performance = pgTable('performance', {
   notes: text('notes'),
   reviewedBy: text('reviewed_by'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const notificationTypeEnum = pgEnum('notification_type', ['login', 'form', 'system']);
+export const notificationRoleEnum = pgEnum('notification_role', ['admin', 'manager']);
+
+export const notifications = pgTable('notifications', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  title: text('title').notNull(),
+  message: text('message').notNull(),
+  type: notificationTypeEnum('type').default('form').notNull(),
+  source: text('source'),
+  actorEmail: text('actor_email'),
+  recipientRole: notificationRoleEnum('recipient_role').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  expiresAt: timestamp('expires_at').default(sql`now() + interval '3 days'`).notNull(),
 });

@@ -6,9 +6,10 @@ import PersonalFooter from './personal-footer';
 
 interface DashboardLayoutProps {
   children: ReactNode;
+  role?: 'admin' | 'manager' | 'employee' | 'hr';
 }
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+export default function DashboardLayout({ children, role = 'manager' }: DashboardLayoutProps) {
   const [collapsed, setCollapsed] = useState<boolean>(false);
 
   return (
@@ -19,7 +20,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         }`}
       >
         <div>
-          <PersonalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+          <PersonalSidebar role={role} collapsed={collapsed} setCollapsed={setCollapsed} />
         </div>
         <div className="flex w-full flex-col transition-all duration-500">
           <PersonalHeader />

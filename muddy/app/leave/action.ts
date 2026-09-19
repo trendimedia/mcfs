@@ -3,6 +3,7 @@
 import { db } from '@/lib/db';
 import { leaveRequests } from '@/lib/db/schema';
 import { revalidatePath } from 'next/cache';
+import { notifyAdminsAndManagers } from '@/lib/notifications';
 
 type LeaveFormData = {
   employeeId: string;
@@ -27,6 +28,14 @@ export async function submitLeaveRequest(data: LeaveFormData) {
     coveringEmployee: data.coveringEmployee,
     emergencyContactName: data.emergencyContactName,
     emergencyContactPhone: data.emergencyContactPhone,
+  });
+
+  await notifyAdminsAndManagers({
+    title: 'Leave request submitted',
+    message: `${data.employeeId} submitted a ${data.leaveType} request from ${data.startDate} to ${data.endDate}.`,
+    type: 'form',
+    source: 'leave',
+    actorEmail: data.employeeId,
   });
 
   revalidatePath('/leave');

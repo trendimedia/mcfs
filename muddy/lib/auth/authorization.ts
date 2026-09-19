@@ -17,7 +17,7 @@ export async function requireRole(
     : [allowedRoles];
 
   if (!roles.includes(session.user.role)) {
-    redirect('/dashboard');
+    redirect('/profile');
   }
 
   return session;

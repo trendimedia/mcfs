@@ -6,7 +6,7 @@ export default async function DashboardRouteLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireRole('admin');
+  const session = await requireRole(['manager', 'hr', 'admin']);
 
-  return <DashboardLayout>{children}</DashboardLayout>;
+  return <DashboardLayout role={session.user.role as 'admin' | 'manager' | 'hr' | 'employee'}>{children}</DashboardLayout>;
 }

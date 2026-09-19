@@ -12,51 +12,33 @@ export default function Footer() {
         © {currentYear} MCFS. All rights reserved.
       </span>
       <div className="flex justify-center gap-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          asChild
-          className="text-muted-foreground hover:!bg-primary rounded transition-all duration-500 hover:scale-105 hover:text-white"
+        <Link
+          href="https://twitter.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Twitter"
+          className="text-muted-foreground hover:!bg-primary flex size-8 items-center justify-center rounded transition-all duration-500 hover:scale-105 hover:text-white"
         >
-          <Link
-            href="https://twitter.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Twitter"
-          >
-            <FaTwitter className="size-4" />
-          </Link>
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          asChild
-          className="text-muted-foreground hover:!bg-primary rounded transition-all duration-500 hover:scale-105 hover:text-white"
+          <FaTwitter className="size-4" />
+        </Link>
+        <Link
+          href="https://facebook.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Facebook"
+          className="text-muted-foreground hover:!bg-primary flex size-8 items-center justify-center rounded transition-all duration-500 hover:scale-105 hover:text-white"
         >
-          <Link
-            href="https://facebook.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Facebook"
-          >
-            <FaFacebook className="size-4" />
-          </Link>
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          asChild
-          className="text-muted-foreground hover:!bg-primary rounded transition-all duration-500 hover:scale-105 hover:text-white"
+          <FaFacebook className="size-4" />
+        </Link>
+        <Link
+          href="https://linkedin.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="LinkedIn"
+          className="text-muted-foreground hover:!bg-primary flex size-8 items-center justify-center rounded transition-all duration-500 hover:scale-105 hover:text-white"
         >
-          <Link
-            href="https://linkedin.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="LinkedIn"
-          >
-            <FaLinkedin className="size-4" />
-          </Link>
-        </Button>
+          <FaLinkedin className="size-4" />
+        </Link>
       </div>
     </footer>
   );

@@ -5,6 +5,22 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
 import { authClient } from '@/lib/auth/client';
+import { getPostLoginPath, syncAppSession } from '@/app/actions/auth';
+import { completeSignup } from '@/app/actions/complete-signup';
+
+function LogoMark({ className = '' }: { className?: string }) {
+  return (
+    <img
+      src="/favicon.ico"
+      alt="MCFS logo"
+      className={className}
+      onError={(event) => {
+        const target = event.currentTarget;
+        target.style.display = 'none';
+      }}
+    />
+  );
+}
 
 export default function AuthPanel() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -21,6 +37,7 @@ export default function AuthPanel() {
   const [name, setName] = useState('');
   const [signUpEmail, setSignUpEmail] = useState('');
   const [signUpPassword, setSignUpPassword] = useState('');
+  const [signUpConfirmPassword, setSignUpConfirmPassword] = useState('');
   const [signUpError, setSignUpError] = useState('');
   const [signUpLoading, setSignUpLoading] = useState(false);
 
@@ -28,28 +45,97 @@ export default function AuthPanel() {
     e.preventDefault();
     setSignInError('');
     setSignInLoading(true);
-    const { error } = await authClient.signIn.email({ email: signInEmail, password: signInPassword });
+
+    const { error } = await authClient.signIn.email({
+      email: signInEmail,
+      password: signInPassword,
+    });
+
     setSignInLoading(false);
+
     if (error) {
       setSignInError(error.message ?? 'Invalid email or password');
       return;
     }
-    router.push('/dashboard');
+
+    await syncAppSession(signInEmail);
+    const nextPath = await getPostLoginPath(signInEmail);
+    router.push(nextPath);
     router.refresh();
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setSignUpError('');
-    setSignUpLoading(true);
-    const { error } = await authClient.signUp.email({ email: signUpEmail, password: signUpPassword, name });
-    setSignUpLoading(false);
-    if (error) {
-      setSignUpError(error.message ?? 'Could not create account');
+
+    if (signUpPassword.length < 8) {
+      setSignUpError('Password must be at least 8 characters long.');
       return;
     }
-    router.push('/dashboard');
-    router.refresh();
+
+    if (signUpPassword !== signUpConfirmPassword) {
+      setSignUpError('Passwords do not match.');
+      return;
+    }
+
+    setSignUpLoading(true);
+
+    try {
+      const { error } = await authClient.signUp.email({
+        email: signUpEmail,
+        password: signUpPassword,
+        name,
+      });
+
+      if (error) {
+        const isDuplicate = /already exists|use another email/i.test(
+          error.message ?? '',
+        );
+
+        if (isDuplicate) {
+          const { error: signInError } = await authClient.signIn.email({
+            email: signUpEmail,
+            password: signUpPassword,
+          });
+
+          if (signInError) {
+            setSignUpError('An account with this email already exists. Please sign in instead.');
+            setIsSignUp(false);
+            return;
+          }
+
+          await completeSignup(signUpEmail);
+          setIsSignUp(false);
+          setName('');
+          setSignUpEmail('');
+          setSignUpPassword('');
+          setSignUpConfirmPassword('');
+          router.push('/');
+          router.refresh();
+          return;
+        }
+
+        setSignUpError(error.message ?? 'Could not create account');
+        return;
+      }
+
+      await completeSignup(signUpEmail);
+      setIsSignUp(false);
+      setName('');
+      setSignUpEmail('');
+      setSignUpPassword('');
+      setSignUpConfirmPassword('');
+      router.push('/');
+      router.refresh();
+    } catch (caughtError) {
+      const message =
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'Could not create account';
+      setSignUpError(message);
+    } finally {
+      setSignUpLoading(false);
+    }
   };
 
   return (
@@ -70,7 +156,7 @@ export default function AuthPanel() {
               placeholder="Email"
               value={signInEmail}
               onChange={(e) => setSignInEmail(e.target.value)}
-              className="w-full rounded-lg border bg-transparent px-3 py-2 shadow-sm outline-none focus:border-rose-600"
+              className="w-full rounded-lg border bg-transparent px-3 py-2 shadow-sm outline-none focus:border-primary"
             />
             <div className="relative">
               <input
@@ -79,7 +165,7 @@ export default function AuthPanel() {
                 placeholder="Password"
                 value={signInPassword}
                 onChange={(e) => setSignInPassword(e.target.value)}
-                className="w-full rounded-lg border bg-transparent px-3 py-2 shadow-sm outline-none focus:border-rose-600"
+                className="w-full rounded-lg border bg-transparent px-3 py-2 shadow-sm outline-none focus:border-primary"
               />
               <button
                 type="button"
@@ -90,27 +176,36 @@ export default function AuthPanel() {
               </button>
             </div>
 
-            <a href="#" className="block text-sm text-muted-foreground hover:text-rose-600">
+            <a href="#" className="block text-sm text-muted-foreground hover:text-primary">
               Forgot password?
             </a>
 
-            {signInError && <p className="text-sm text-rose-600">{signInError}</p>}
+            {signInError && <p className="text-sm text-red-600">{signInError}</p>}
 
             <button
               type="submit"
               disabled={signInLoading}
-              className="w-full rounded-full bg-rose-600 px-4 py-2.5 font-medium text-white hover:bg-rose-500 disabled:opacity-60"
+              className="w-full rounded-full bg-primary px-4 py-2.5 font-medium text-white hover:bg-emerald-600 disabled:opacity-60"
             >
               {signInLoading ? 'Signing in...' : 'Sign In'}
             </button>
 
-            <button
-              type="button"
-              onClick={() => setIsSignUp(true)}
-              className="w-full text-sm text-muted-foreground hover:text-rose-600 md:hidden"
-            >
-              Don&apos;t have an account? Sign up
-            </button>
+            <div className="space-y-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setIsSignUp(true)}
+                className="w-full text-sm text-muted-foreground hover:text-primary md:hidden"
+              >
+                Don&apos;t have an account? Sign up
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsSignUp(true)}
+                className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Create an account
+              </button>
+            </div>
           </form>
         </div>
 
@@ -129,7 +224,7 @@ export default function AuthPanel() {
               placeholder="Full Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border bg-transparent px-3 py-2 shadow-sm outline-none focus:border-rose-600"
+              className="w-full rounded-lg border bg-transparent px-3 py-2 shadow-sm outline-none focus:border-primary"
             />
             <input
               type="email"
@@ -137,7 +232,7 @@ export default function AuthPanel() {
               placeholder="Email"
               value={signUpEmail}
               onChange={(e) => setSignUpEmail(e.target.value)}
-              className="w-full rounded-lg border bg-transparent px-3 py-2 shadow-sm outline-none focus:border-rose-600"
+              className="w-full rounded-lg border bg-transparent px-3 py-2 shadow-sm outline-none focus:border-primary"
             />
             <input
               type="password"
@@ -145,26 +240,43 @@ export default function AuthPanel() {
               placeholder="Password"
               value={signUpPassword}
               onChange={(e) => setSignUpPassword(e.target.value)}
-              className="w-full rounded-lg border bg-transparent px-3 py-2 shadow-sm outline-none focus:border-rose-600"
+              className="w-full rounded-lg border bg-transparent px-3 py-2 shadow-sm outline-none focus:border-primary"
+            />
+            <input
+              type="password"
+              required
+              placeholder="Confirm Password"
+              value={signUpConfirmPassword}
+              onChange={(e) => setSignUpConfirmPassword(e.target.value)}
+              className="w-full rounded-lg border bg-transparent px-3 py-2 shadow-sm outline-none focus:border-primary"
             />
 
-            {signUpError && <p className="text-sm text-rose-600">{signUpError}</p>}
+            {signUpError && <p className="text-sm text-red-600">{signUpError}</p>}
 
             <button
               type="submit"
               disabled={signUpLoading}
-              className="w-full rounded-full bg-rose-600 px-4 py-2.5 font-medium text-white hover:bg-rose-500 disabled:opacity-60"
+              className="w-full rounded-full bg-primary px-4 py-2.5 font-medium text-white hover:bg-emerald-600 disabled:opacity-60"
             >
               {signUpLoading ? 'Creating account...' : 'Sign Up'}
             </button>
 
-            <button
-              type="button"
-              onClick={() => setIsSignUp(false)}
-              className="w-full text-sm text-muted-foreground hover:text-rose-600 md:hidden"
-            >
-              Already have an account? Sign in
-            </button>
+            <div className="space-y-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setIsSignUp(false)}
+                className="w-full text-sm text-muted-foreground hover:text-primary md:hidden"
+              >
+                Already have an account? Sign in
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsSignUp(false)}
+                className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Back to sign in
+              </button>
+            </div>
           </form>
         </div>
 
@@ -174,7 +286,7 @@ export default function AuthPanel() {
             ${isSignUp ? 'left-0 rounded-r-[8rem]' : 'left-1/2 rounded-l-[8rem]'}`}
         >
           <div
-            className={`relative h-full w-[200%] bg-gradient-to-br from-rose-600 to-rose-800 text-white transition-transform duration-700 ease-in-out
+            className={`relative h-full w-[200%] bg-gradient-to-br from-primary to-emerald-700 text-white transition-transform duration-700 ease-in-out
               ${isSignUp ? 'translate-x-0' : '-translate-x-1/2'}`}
           >
             {/* Left panel content — shown when NOT signing up (overlay on right) */}
@@ -182,11 +294,17 @@ export default function AuthPanel() {
               className={`absolute top-0 left-0 h-full w-1/2 flex flex-col items-center justify-center text-center px-10 transition-opacity duration-500
                 ${isSignUp ? 'opacity-0' : 'opacity-100'}`}
             >
+              <div className="mb-6 flex flex-col items-center justify-center gap-3 text-center">
+                <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white/10 p-2 shadow-lg ring-1 ring-white/20">
+                  <LogoMark className="h-14 w-14 object-contain" />
+                </div>
+                <h2 className="text-3xl font-bold tracking-tight">MCFS</h2>
+              </div>
               <h2 className="text-3xl font-bold mb-4">Hello!</h2>
               <p className="mb-8 text-white/90">Sign up now and enjoy all the features of MCFS.</p>
               <button
                 onClick={() => setIsSignUp(true)}
-                className="rounded-full border-2 border-white px-8 py-2.5 font-medium hover:bg-white hover:text-rose-600 transition-colors"
+                className="rounded-full border-2 border-white px-8 py-2.5 font-medium hover:bg-white hover:text-primary transition-colors"
               >
                 Sign Up
               </button>
@@ -197,11 +315,17 @@ export default function AuthPanel() {
               className={`absolute top-0 right-0 h-full w-1/2 flex flex-col items-center justify-center text-center px-10 transition-opacity duration-500
                 ${isSignUp ? 'opacity-100' : 'opacity-0'}`}
             >
+              <div className="mb-6 flex flex-col items-center justify-center gap-3 text-center">
+                <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white/10 p-2 shadow-lg ring-1 ring-white/20">
+                  <LogoMark className="h-14 w-14 object-contain" />
+                </div>
+                <h2 className="text-3xl font-bold tracking-tight">MCFS</h2>
+              </div>
               <h2 className="text-3xl font-bold mb-4">Welcome Back!</h2>
               <p className="mb-8 text-white/90">Sign in with your email and password to continue.</p>
               <button
                 onClick={() => setIsSignUp(false)}
-                className="rounded-full border-2 border-white px-8 py-2.5 font-medium hover:bg-white hover:text-rose-600 transition-colors"
+                className="rounded-full border-2 border-white px-8 py-2.5 font-medium hover:bg-white hover:text-primary transition-colors"
               >
                 Sign In
               </button>

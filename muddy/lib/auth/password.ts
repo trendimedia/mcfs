@@ -7,8 +7,16 @@ export async function hashPassword(password: string) {
 }
 
 export async function verifyPassword(
-  password: string,
   passwordHash: string,
+  password: string,
 ) {
-  return argon2.verify(passwordHash, password);
+  if (!passwordHash || !password) {
+    return false;
+  }
+
+  try {
+    return await argon2.verify(passwordHash, password);
+  } catch {
+    return false;
+  }
 }
