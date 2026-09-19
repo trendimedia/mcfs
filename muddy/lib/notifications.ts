@@ -105,6 +105,10 @@ export async function getNotificationsForCurrentUser(): Promise<NotificationItem
     return [];
   }
 
+  if (!process.env.DATABASE_URL && !process.env.NEON_DATABASE_URL && !process.env.POSTGRES_URL) {
+    return [];
+  }
+
   try {
     const rows = await db
       .select()
