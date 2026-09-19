@@ -14,6 +14,8 @@ import {
 } from '@/components/ui/table';
 import JobApplicationForm from '@/components/job-application';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ApplicationsPage() {
   const rows = await db
     .select()

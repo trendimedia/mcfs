@@ -5,6 +5,8 @@ import { getCurrentUser } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
 import { attendance } from '@/lib/db/schema';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AttendancePage() {
   const me = await getCurrentUser();
 

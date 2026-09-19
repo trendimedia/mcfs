@@ -7,6 +7,8 @@ import { requireRole } from '@/lib/auth/authorization';
 import { db } from '@/lib/db';
 import { performance, users } from '@/lib/db/schema';
 
+export const dynamic = 'force-dynamic';
+
 export default async function PerformancePage() {
   const me = await getCurrentUser();
   const canReview = me ? ['admin', 'manager'].includes(me.role) : false;

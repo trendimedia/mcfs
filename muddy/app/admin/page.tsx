@@ -4,6 +4,8 @@ import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { updateUserRole } from '@/app/admin/actions';
 
+export const dynamic = 'force-dynamic';
+
 const AdminPage = async () => {
   await requireRole('admin');
 

@@ -11,6 +11,8 @@ import {
 import { db } from '@/lib/db';
 import { leaveRequests } from '@/lib/db/schema';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AbsencePage() {
   const allRows = await db.select().from(leaveRequests);
 

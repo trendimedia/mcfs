@@ -2,6 +2,8 @@
 import { db } from '@/lib/db';
 import { attendance, leaveRequests, performance, users } from '@/lib/db/schema';
 
+export const dynamic = 'force-dynamic';
+
 const page = async () => {
   const [allUsers, allAttendance, allLeave, allPerformance] = await Promise.all([
     db.select().from(users),

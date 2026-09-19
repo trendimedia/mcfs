@@ -7,6 +7,8 @@ import { redirect } from 'next/navigation';
 import AttendanceCalendar from '@/components/attendace-calender';
 //import AttendanceCalendar from '@/components/attendance-calendar';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ProfilePage() {
   const me = await getCurrentUser();
   if (!me) redirect('/sign-up');
