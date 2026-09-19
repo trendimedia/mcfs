@@ -7,7 +7,6 @@ import { eq } from 'drizzle-orm';
 
 import { db } from '@/lib/db';
 import { sessions, users } from '@/lib/db/schema';
-import { auth } from '@/lib/auth/server';
 
 const SESSION_COOKIE = 'mcfs_session';
 const SESSION_DURATION = 30 * 24 * 60 * 60 * 1000;
@@ -83,32 +82,7 @@ export async function getCurrentSession() {
     }
   }
 
-  const { data: neonSession } = await auth.getSession();
-  const email = neonSession?.user?.email?.toLowerCase();
-
-  if (!email) {
-    return null;
-  }
-
-  const result = await db
-    .select()
-    .from(users)
-    .where(eq(users.email, email))
-    .limit(1);
-
-  const user = result[0];
-
-  if (!user || !user.isActive) {
-    return null;
-  }
-
-  await createSession(user.id);
-
-  return {
-    sessionId: user.id,
-    expiresAt: new Date(Date.now() + SESSION_DURATION),
-    user,
-  };
+  return null;
 }
 
 export async function requireSession() {
