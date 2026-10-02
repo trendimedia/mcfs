@@ -129,3 +129,28 @@ export const notifications = pgTable('notifications', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   expiresAt: timestamp('expires_at').default(sql`now() + interval '3 days'`).notNull(),
 });
+
+export const employeeStatusEnum = pgEnum('employee_status', ['active', 'inactive', 'terminated']);
+
+export const employees = pgTable('employees', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  employeeCode: text('employee_code').notNull().unique(),
+
+  firstName: text('first_name').notNull(),
+  lastName: text('last_name').notNull(),
+  email: text('email').notNull(),
+  mobileNumber: text('mobile_number').notNull(),
+
+  address: text('address').notNull(),
+  city: text('city').notNull(),
+  location: text('location').notNull(),
+  position: text('position').notNull(),
+  site: text('site').notNull(),
+  salary: numeric('salary').notNull(),
+
+  nextOfKinName: text('next_of_kin_name').notNull(),
+  nextOfKinPhone: text('next_of_kin_phone').notNull(),
+
+  status: employeeStatusEnum('status').default('active').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});

@@ -1,11 +1,13 @@
-import { revalidatePath } from 'next/cache';
+// app/dashboard/performance/page.tsx
+import { and, gte, lte } from 'drizzle-orm';
 import { eq } from 'drizzle-orm';
-
+import EmployeeAttendancePanel from '@/components/employee-attendance-panel';
+import { attendance, employees, performance } from '@/lib/db/schema';
 import PdfExportButton from '@/components/pdf-export-button';
 import { getCurrentUser } from '@/lib/auth/current-user';
 import { requireRole } from '@/lib/auth/authorization';
 import { db } from '@/lib/db';
-import { performance, users } from '@/lib/db/schema';
+import { submitPerformanceReview } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +25,33 @@ export default async function PerformancePage() {
       ? Math.round(rows.reduce((sum, row) => sum + Number(row.scorePercent), 0) / rows.length)
       : 0;
 
-  const employeeOptions = await db.select().from(users).where(eq(users.isActive, true));
+  const employeeOptions = await db.select().from(employees).where(eq(employees.status, 'active'));
+
+
+
+const now = new Date();
+const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+const todayStr = now.toISOString().split('T')[0];
+const daysElapsed = now.getDate();
+
+const monthAttendance = await db
+  .select()
+  .from(attendance)
+  .where(and(gte(attendance.date, firstDay), lte(attendance.date, lastDay)));
+
+const attendanceSummary = employeeOptions.map((emp) => {
+  const theirRows = monthAttendance.filter((r) => r.employeeCode === emp.employeeCode);
+  const presentCount = theirRows.filter((r) => r.status === 'present').length;
+  const todayRow = theirRows.find((r) => r.date === todayStr);
+
+  return {
+    ...emp,
+    presentCount,
+    performancePercent: Math.round((presentCount / daysElapsed) * 100),
+    todayStatus: todayRow?.status ?? null,
+  };
+});
 
   return (
     <div className="space-y-6 p-6">
@@ -37,11 +65,9 @@ export default async function PerformancePage() {
 
       {canReview && (
         <form action={submitPerformanceReview} className="rounded-lg border bg-card p-4">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <div>
-              <h2 className="text-lg font-semibold">Add review</h2>
-              <p className="text-sm text-muted-foreground">Admin and managers can record staff performance notes.</p>
-            </div>
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">Add Review</h2>
+            <p className="text-sm text-muted-foreground">Write a review, score, and mark today's attendance in one go.</p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-4">
@@ -49,9 +75,9 @@ export default async function PerformancePage() {
               <span>Employee</span>
               <select name="employeeCode" defaultValue="" className="w-full rounded-md border bg-background px-3 py-2" required>
                 <option value="" disabled>Select employee</option>
-                {employeeOptions.map((user) => (
-                  <option key={user.id} value={user.employeeCode ?? ''} disabled={!user.employeeCode}>
-                    {user.email} {user.employeeCode ? `(${user.employeeCode})` : ''}
+                {employeeOptions.map((emp) => (
+                  <option key={emp.id} value={emp.employeeCode}>
+                    {emp.firstName} {emp.lastName} ({emp.employeeCode})
                   </option>
                 ))}
               </select>
@@ -67,10 +93,18 @@ export default async function PerformancePage() {
               <input type="number" min={0} max={100} name="scorePercent" className="w-full rounded-md border bg-background px-3 py-2" required />
             </label>
 
-            <div className="flex items-end">
-              <button type="submit" className="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-600">
-                Save review
-              </button>
+            <div className="space-y-2 text-sm">
+              <span>Today's Attendance</span>
+              <div className="flex gap-3 pt-2">
+                <label className="flex items-center gap-1.5">
+                  <input type="radio" name="attendanceStatus" value="present" defaultChecked />
+                  Present
+                </label>
+                <label className="flex items-center gap-1.5">
+                  <input type="radio" name="attendanceStatus" value="absent" />
+                  Absent
+                </label>
+              </div>
             </div>
           </div>
 
@@ -78,8 +112,14 @@ export default async function PerformancePage() {
             <span>Review notes</span>
             <textarea name="notes" rows={3} className="w-full rounded-md border bg-background px-3 py-2" placeholder="Add notes for this employee review" />
           </label>
+
+          <button type="submit" className="mt-4 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-600">
+            Save Review &amp; Attendance
+          </button>
         </form>
       )}
+
+      {canReview && <EmployeeAttendancePanel employees={attendanceSummary} />}
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-lg border bg-card p-4">
@@ -126,37 +166,4 @@ export default async function PerformancePage() {
       </div>
     </div>
   );
-}
-
-async function submitPerformanceReview(formData: FormData) {
-  'use server';
-
-  const me = await getCurrentUser();
-  if (!me) {
-    throw new Error('You must be signed in to add a performance review.');
-  }
-
-  await requireRole(['admin', 'manager']);
-
-  const employeeCode = String(formData.get('employeeCode') ?? '').trim();
-  const month = String(formData.get('month') ?? '').trim();
-  const scoreValue = Number(formData.get('scorePercent') ?? 0);
-  const notes = String(formData.get('notes') ?? '').trim();
-
-  if (!employeeCode || !month || !Number.isFinite(scoreValue)) {
-    throw new Error('Employee, month, and score are required.');
-  }
-
-  const scorePercent = Math.min(Math.max(scoreValue, 0), 100);
-  const reviewerName = me.employeeCode ? `${me.employeeCode} (${me.email})` : me.email;
-
-  await db.insert(performance).values({
-    employeeCode,
-    month,
-    scorePercent: scorePercent.toString(),
-    notes: notes || 'No notes added',
-    reviewedBy: reviewerName,
-  });
-
-  revalidatePath('/dashboard/performance');
 }
